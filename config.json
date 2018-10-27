@@ -1,0 +1,12 @@
+{
+    "bots": [
+        {
+            "name": "aixyhpsa",
+            "key": "",
+            "description": "This is a server managing bot"
+        }
+    ],
+    "pokemon-fusion": {
+        "url": "https://pokemon.alexonsager.net/"
+    }
+}
