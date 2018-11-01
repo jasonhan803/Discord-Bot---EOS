@@ -4,12 +4,21 @@ const bot = new Discord.Client();
 
 const prefix = '/';
 const terminal = require('./terminal/terminal.js');
+const roles = require('./roles.js');
 
 var messageChannel = null
 terminal.run(bot); //Running terminal interface
 
+//Import queue system and run
+var Queue = require('./queue.js')
+queue = new Queue();
+
+const system = require('./system.js');
+system.run(queue);
+
 bot.on('message', message => {
 
+    queue.add(message.content)
     //Command handler
     let args = message.content.slice(prefix.length).trim().split(' ');
     let cmd = args.shift().toLowerCase();
@@ -49,14 +58,18 @@ bot.on('ready', () => {
     //Now create the main messaging channel object for global use
     messageChannel = bot.channels.get(generalChannel.firstKey())
     //console.log(messageChannel)
-    messageChannel.send('Feels good man')
+    //messageChannel.send('Feels good man')
 
     //Get the list of all the channel id's in the general category
     bot.channels.get(generalCategoryId).children.keyArray().forEach(channelId => {
         let channel = bot.channels.get(channelId)
-        console.log(channel.type + ' - ' + channel.name + ' - ' + channel.id)
+        //console.log(channel.type + ' - ' + channel.name + ' - ' + channel.id)
     });
+    
+    //Get the roles in the server
+    //console.log(roles.run(bot))
 
+    
 });
 
 bot.on('disconnect', event => {
