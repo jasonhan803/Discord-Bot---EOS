@@ -3,7 +3,9 @@ var axios = require('axios');
 var uuid = require('uuid');
 
 exports.run = async (content) => {
+    /* Process the content here; check if theres a attachment and message with it
 
+    */
     const query = {
         find: "eosforum",
         maxTimeMS: 1000,
@@ -32,7 +34,7 @@ exports.run = async (content) => {
         reply_to_poster: "eosforumanon",
         reply_to_post_uuid: thread_uuid,
         certify: 0,
-        content: content,
+        content: content.message,
         post_uuid: uuid.v4(),
         json_metadata: JSON.stringify({
             title: "",
@@ -42,9 +44,9 @@ exports.run = async (content) => {
             parent_poster: "eosforumanon",
             edit: false,
             attachment: {
-                value: "",
-                type: "",
-                display: ""
+                value: content.url,
+                type: content.type,
+                display: content.display
             }
         })
     };
@@ -56,9 +58,12 @@ exports.run = async (content) => {
     if (response2.data.error) {
         console.log('error');
         console.log(response2.data.error);
+        let time = response2.data.error.replace( /(^.+)(\w\d+\w)(.+$)/i,'$2');
+        return time;
     }
     else {
         console.log('successfully posted');
         console.log(response2.data.transaction_id);
+        return 1;
     }
 }

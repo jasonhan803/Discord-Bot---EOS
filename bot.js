@@ -1,29 +1,65 @@
 const config = require('./config.json');
 const Discord = require('discord.js');
+var Queue = require('./queue.js')
+const system = require('./system.js');
+const terminal = require('./terminal/terminal.js'); /* Not needed */
+const roles = require('./roles.js'); /* Not needed */
+
 const bot = new Discord.Client();
 
-const prefix = '/';
-const terminal = require('./terminal/terminal.js');
-const roles = require('./roles.js');
+terminal.run(bot); //Running terminal interface
+queue = new Queue(); //Message Queue
+system.run(queue); //Run the Queue system with the Queue
 
 var messageChannel = null
-terminal.run(bot); //Running terminal interface
-
-//Import queue system and run
-var Queue = require('./queue.js')
-queue = new Queue();
-
-const system = require('./system.js');
-system.run(queue);
+const prefix = '/';
 
 bot.on('message', message => {
+    if(message.author.bot) return;
 
-    queue.add(message.content)
+    //Check string length (Must be less than or equal to 10240)
+    let content = { //Content object
+        message: message.content,
+        url: '',
+        type: '',
+        display: ''
+    };
+
+    if(message.attachments.size > 0){
+        console.log('posted as attachments')
+        var Attachment = (message.attachments).array();
+        content.url = Attachment[0].url
+        var extention = content.url.split('.').pop(); //Check the attachment type
+        if(extention == 'mp3'){
+            content.display = 'mp3'
+            
+        } else {
+            content.display = 'img'
+        }
+        content.type = 'url'
+    }
+    if(message.embeds.length > 0){
+        console.log('posted as embed')
+        var Embed = message.embeds[0];
+        content.type = 'url';
+        
+        if(Embed.type == 'video'){
+            content.url = Embed.url;
+            content.display = 'mp4';
+        }
+        if(Embed.type == 'image'){
+            content.url = Embed.url;
+            content.display = 'img'
+        }
+        
+    }
+    queue.add(content)
+    
     //Command handler
+    /*
     let args = message.content.slice(prefix.length).trim().split(' ');
     let cmd = args.shift().toLowerCase();
-
-    if(message.author.bot) return;
+    
     if(message.author.presence.status == 'offline') {
         const bruh = bot.emojis.find(emoji => emoji.name == 'bruh');
         message.channel.send('Why are you typing when you are offline ' + message.author + ' ' + bruh)
@@ -43,6 +79,7 @@ bot.on('message', message => {
         //console.log("Command does not exist or has resuletd in error");
         message.channel.send('Command does not exist')
     }
+    */
 });
 
 bot.on('ready', () => {
